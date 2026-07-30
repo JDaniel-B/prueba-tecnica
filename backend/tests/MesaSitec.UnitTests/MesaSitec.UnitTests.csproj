@@ -19,6 +19,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\src\MesaSitec.Api\MesaSitec.Api.csproj" />
     <ProjectReference Include="..\..\src\MesaSitec.Aplicacion\MesaSitec.Aplicacion.csproj" />
     <ProjectReference Include="..\..\src\MesaSitec.Dominio\MesaSitec.Dominio.csproj" />
     <ProjectReference Include="..\..\src\MesaSitec.Infraestructura\MesaSitec.Infraestructura.csproj" />

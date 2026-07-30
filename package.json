@@ -7,7 +7,7 @@
   ],
   "scripts": {
     "dev": "concurrently --kill-others --names API,WEB --prefix-colors blue,magenta \"npm run dev:api\" \"npm run dev:web\"",
-    "dev:api": "dotnet run --project backend/src/MesaSitec.Api/MesaSitec.Api.csproj",
+    "dev:api": "dotenv -e .env -- dotnet run --project backend/src/MesaSitec.Api/MesaSitec.Api.csproj",
     "dev:web": "npm run dev --workspace frontend",
     "build": "npm run build:api && npm run build:web",
     "build:api": "dotnet build backend/MesaSitec.sln --no-restore",
@@ -16,6 +16,7 @@
     "lint": "npm run lint --workspace frontend"
   },
   "devDependencies": {
-    "concurrently": "^10.0.4"
+    "concurrently": "^10.0.4",
+    "dotenv-cli": "^11.0.0"
   }
 }
