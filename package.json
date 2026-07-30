@@ -1,0 +1,21 @@
+{
+  "name": "mesasitec",
+  "version": "0.1.0",
+  "private": true,
+  "workspaces": [
+    "frontend"
+  ],
+  "scripts": {
+    "dev": "concurrently --kill-others --names API,WEB --prefix-colors blue,magenta \"npm run dev:api\" \"npm run dev:web\"",
+    "dev:api": "dotnet run --project backend/src/MesaSitec.Api/MesaSitec.Api.csproj",
+    "dev:web": "npm run dev --workspace frontend",
+    "build": "npm run build:api && npm run build:web",
+    "build:api": "dotnet build backend/MesaSitec.sln --no-restore",
+    "build:web": "npm run build --workspace frontend",
+    "test": "dotnet test backend/MesaSitec.sln --no-restore",
+    "lint": "npm run lint --workspace frontend"
+  },
+  "devDependencies": {
+    "concurrently": "^10.0.4"
+  }
+}
