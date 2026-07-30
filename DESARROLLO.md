@@ -26,6 +26,26 @@ Para detenerlos, presiona `Ctrl+C`.
 La API crea automáticamente `backend/src/MesaSitec.Api/mesasitec.db` y aplica las
 migraciones pendientes. El archivo es local y está excluido de Git.
 
+Si la base está vacía, también crea automáticamente los dos tenants, siete usuarios,
+ocho categorías y 33 solicitudes requeridas. Todos los usuarios usan:
+
+```text
+Contraseña: Sitec.2026
+```
+
+Algunas credenciales disponibles:
+
+```text
+admin@norte.test
+agente1@norte.test
+user1@norte.test
+admin@sur.test
+user1@sur.test
+```
+
+Las fechas se calculan a partir de `SEED_FECHA_BASE`. Su valor predeterminado es
+`2026-01-15T08:00:00Z` y solo se utiliza cuando la base todavía está vacía.
+
 ## Crear una migración
 
 Restaura la herramienta local la primera vez:

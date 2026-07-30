@@ -46,6 +46,12 @@ public sealed class Usuario
 
     public bool Activo { get; private set; }
 
+    public void ActualizarPasswordHash(string passwordHash)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(passwordHash);
+        PasswordHash = passwordHash;
+    }
+
     private static void ValidarIdentificador(Guid id, string parametro)
     {
         if (id == Guid.Empty)
