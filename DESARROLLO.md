@@ -5,6 +5,7 @@
 Desde la raíz del repositorio:
 
 ```sh
+copy .env.example .env
 dotnet restore backend/MesaSitec.sln
 npm install
 ```
@@ -42,6 +43,11 @@ user1@norte.test
 admin@sur.test
 user1@sur.test
 ```
+
+Puedes probar `POST /api/v1/auth/login` desde Swagger. Copia el valor de
+`accessToken`, pulsa **Authorize** y pégalo para consultar `GET /api/v1/me`.
+El token dura ocho horas y contiene los claims `sub`, `tenantId`, `rol` y
+`email`.
 
 Las fechas se calculan a partir de `SEED_FECHA_BASE`. Su valor predeterminado es
 `2026-01-15T08:00:00Z` y solo se utiliza cuando la base todavía está vacía.

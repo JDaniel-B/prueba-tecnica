@@ -1,4 +1,7 @@
+using MesaSitec.Aplicacion.Autenticacion;
+using MesaSitec.Aplicacion.Autenticacion.Abstracciones;
 using MesaSitec.Dominio.Entidades;
+using MesaSitec.Infraestructura.Autenticacion;
 using MesaSitec.Infraestructura.Persistencia;
 using MesaSitec.Infraestructura.Persistencia.Semillas;
 using Microsoft.AspNetCore.Identity;
@@ -19,6 +22,9 @@ public static class ServiceCollectionExtensions
             options.UseSqlite(connectionString));
         services.AddScoped<IPasswordHasher<Usuario>, PasswordHasher<Usuario>>();
         services.AddScoped<SembradorDatos>();
+        services.AddScoped<IUsuarioAutenticacionRepository, UsuarioAutenticacionRepository>();
+        services.AddScoped<IPasswordVerifier, PasswordVerifier>();
+        services.AddScoped<IAuthService, AuthService>();
 
         return services;
     }
