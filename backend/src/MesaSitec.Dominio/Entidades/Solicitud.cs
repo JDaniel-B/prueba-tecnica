@@ -1,4 +1,5 @@
 using MesaSitec.Dominio.Enums;
+using MesaSitec.Dominio.Servicios;
 
 namespace MesaSitec.Dominio.Entidades;
 
@@ -23,7 +24,7 @@ public sealed class Solicitud
         PrioridadSolicitud prioridad,
         Guid solicitanteId,
         DateTime fechaCreacion,
-        DateTime fechaLimiteSla)
+        int categoriaSlaHoras)
     {
         ValidarIdentificador(id, nameof(id));
         ValidarIdentificador(tenantId, nameof(tenantId));
@@ -41,14 +42,6 @@ public sealed class Solicitud
             DescripcionLongitudMinima,
             DescripcionLongitudMaxima);
         ValidarFechaUtc(fechaCreacion, nameof(fechaCreacion));
-        ValidarFechaUtc(fechaLimiteSla, nameof(fechaLimiteSla));
-
-        if (fechaLimiteSla < fechaCreacion)
-        {
-            throw new ArgumentException(
-                "La fecha límite del SLA no puede ser anterior a la creación.",
-                nameof(fechaLimiteSla));
-        }
 
         Id = id;
         TenantId = tenantId;
@@ -60,7 +53,10 @@ public sealed class Solicitud
         Estado = EstadoSolicitud.Nueva;
         SolicitanteId = solicitanteId;
         FechaCreacion = fechaCreacion;
-        FechaLimiteSla = fechaLimiteSla;
+        FechaLimiteSla = CalculadoraSla.Calcular(
+            fechaCreacion,
+            categoriaSlaHoras,
+            prioridad);
     }
 
     public Guid Id { get; private set; }

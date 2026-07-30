@@ -128,7 +128,7 @@ public sealed class MesaSitecDbContextTests
             PrioridadSolicitud.Alta,
             solicitanteId,
             FechaBase,
-            FechaBase.AddHours(6));
+            8);
     }
 
     private sealed class BaseDatosEnMemoria : IAsyncDisposable

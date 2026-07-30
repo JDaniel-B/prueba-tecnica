@@ -58,7 +58,7 @@ public sealed class EntidadesTests
             PrioridadSolicitud.Alta,
             Guid.NewGuid(),
             DateTime.SpecifyKind(FechaBase, DateTimeKind.Local),
-            FechaBase.AddHours(6));
+            8);
 
         Assert.Throws<ArgumentException>(accion);
     }
@@ -75,6 +75,6 @@ public sealed class EntidadesTests
             PrioridadSolicitud.Alta,
             Guid.NewGuid(),
             FechaBase,
-            FechaBase.AddHours(6));
+            8);
     }
 }
