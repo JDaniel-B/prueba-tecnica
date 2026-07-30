@@ -25,6 +25,12 @@ public sealed class GlobalExceptionHandler(
                 "Recurso no encontrado",
                 exception.Message,
                 "recurso-no-encontrado"),
+            ParametroInvalidoException => new DatosProblema(
+                StatusCodes.Status400BadRequest,
+                "PARAMETRO_INVALIDO",
+                "Parámetro inválido",
+                exception.Message,
+                "parametro-invalido"),
             _ => new DatosProblema(
                 StatusCodes.Status500InternalServerError,
                 "ERROR_INTERNO",

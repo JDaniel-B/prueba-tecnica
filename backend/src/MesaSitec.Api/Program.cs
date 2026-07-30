@@ -33,6 +33,19 @@ builder.Services.Configure<ApiBehaviorOptions>(options =>
 {
     options.InvalidModelStateResponseFactory = context =>
     {
+        var esParametroConsulta = HttpMethods.IsGet(
+            context.HttpContext.Request.Method);
+        var status = esParametroConsulta
+            ? StatusCodes.Status400BadRequest
+            : StatusCodes.Status422UnprocessableEntity;
+        var codigo = esParametroConsulta ? "PARAMETRO_INVALIDO" : "VALIDACION";
+        var titulo = esParametroConsulta
+            ? "Parámetro inválido"
+            : "Error de validación";
+        var detail = esParametroConsulta
+            ? "Uno o más parámetros de consulta no son válidos."
+            : "Uno o más campos no son válidos.";
+        var tipo = esParametroConsulta ? "parametro-invalido" : "validacion";
         var errores = context.ModelState
             .Where(item => item.Value?.Errors.Count > 0)
             .ToDictionary(
@@ -46,17 +59,17 @@ builder.Services.Configure<ApiBehaviorOptions>(options =>
                     .ToArray());
         var problema = new
         {
-            type = "https://mesasitec.local/errores/validacion",
-            title = "Error de validación",
-            status = StatusCodes.Status422UnprocessableEntity,
-            detail = "Uno o más campos no son válidos.",
-            codigo = "VALIDACION",
+            type = $"https://mesasitec.local/errores/{tipo}",
+            title = titulo,
+            status,
+            detail,
+            codigo,
             errores
         };
 
         return new ObjectResult(problema)
         {
-            StatusCode = StatusCodes.Status422UnprocessableEntity,
+            StatusCode = status,
             ContentTypes = { "application/problem+json" }
         };
     };

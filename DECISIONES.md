@@ -11,6 +11,10 @@
 3. Se mantuvo ESLint como único linter del frontend. Se descartó Oxlint porque las
    versiones generadas por `create-vue` tenían un conflicto de dependencias y un
    segundo linter no aporta valor suficiente al alcance de esta prueba.
+4. Las consultas multi-tenant reciben el `tenantId` desde el token y lo aplican como
+   primer predicado en el repositorio. Para un usuario `Solicitante`, el servicio
+   agrega además su `usuarioId`. Se descartó aceptar el tenant desde parámetros HTTP
+   porque permitiría consultar otra organización manipulando la petición.
 
 ## Uso de IA
 
@@ -20,5 +24,5 @@ de incorporarlo y mantendré aquí las partes en las que la IA haya intervenido.
 
 ## Pendiente para el cierre
 
-Antes de entregar se documentarán la tercera decisión técnica, el principal bloqueo
-y qué mejoraría con una semana adicional.
+Antes de entregar se documentarán el principal bloqueo y qué mejoraría con una
+semana adicional.

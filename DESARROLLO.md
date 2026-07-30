@@ -49,6 +49,17 @@ Puedes probar `POST /api/v1/auth/login` desde Swagger. Copia el valor de
 El token dura ocho horas y contiene los claims `sub`, `tenantId`, `rol` y
 `email`.
 
+Con la sesión autorizada también puedes probar el listado paginado:
+
+```text
+GET /api/v1/solicitudes?page=1&pageSize=20&sort=-fechaCreacion
+GET /api/v1/solicitudes?estado=EnProceso&prioridad=Alta&vencidas=true
+```
+
+Un usuario `Admin` o `Agente` ve las solicitudes de su organización. Un usuario
+`Solicitante` ve únicamente las que él creó; el servidor obtiene ambos límites
+desde el JWT, nunca desde parámetros enviados por el cliente.
+
 Las fechas se calculan a partir de `SEED_FECHA_BASE`. Su valor predeterminado es
 `2026-01-15T08:00:00Z` y solo se utiliza cuando la base todavía está vacía.
 

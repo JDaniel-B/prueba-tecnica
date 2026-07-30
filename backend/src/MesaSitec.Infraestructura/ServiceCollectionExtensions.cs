@@ -1,9 +1,12 @@
 using MesaSitec.Aplicacion.Autenticacion;
 using MesaSitec.Aplicacion.Autenticacion.Abstracciones;
+using MesaSitec.Aplicacion.Solicitudes;
+using MesaSitec.Aplicacion.Solicitudes.Abstracciones;
 using MesaSitec.Dominio.Entidades;
 using MesaSitec.Infraestructura.Autenticacion;
 using MesaSitec.Infraestructura.Persistencia;
 using MesaSitec.Infraestructura.Persistencia.Semillas;
+using MesaSitec.Infraestructura.Solicitudes;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -25,6 +28,8 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IUsuarioAutenticacionRepository, UsuarioAutenticacionRepository>();
         services.AddScoped<IPasswordVerifier, PasswordVerifier>();
         services.AddScoped<IAuthService, AuthService>();
+        services.AddScoped<ISolicitudConsultaRepository, SolicitudConsultaRepository>();
+        services.AddScoped<ISolicitudConsultaService, SolicitudConsultaService>();
 
         return services;
     }
