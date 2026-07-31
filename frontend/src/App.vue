@@ -18,7 +18,7 @@ function salir() { auth.logout(); void router.push('/login') }
       <button class="btn btn--ghost" data-testid="btn-logout" @click="salir">Salir</button>
     </div>
   </header>
-  <div v-if="toast.mensaje" class="toast" data-testid="toast-mensaje">{{ toast.mensaje }}</div>
+  <div v-if="toast.mensaje" class="toast" data-testid="toast-mensaje" role="status" aria-live="polite">{{ toast.mensaje }}</div>
   <RouterView />
 </template>
 
@@ -61,6 +61,13 @@ a { color: inherit; text-decoration: none; }
 .toast { position:fixed; z-index:20; right:1rem; bottom:1rem; max-width:24rem; padding:1rem; border-radius:.7rem; background:#11213c; color:white; box-shadow:0 1rem 3rem #0003; }
 .badge { display:inline-flex; padding:.25rem .55rem; border-radius:999px; background:#e8eef8; font-size:.8rem; font-weight:700; }
 .loading,.empty,.error-box { padding:2rem; text-align:center; }
+
+@media (max-width: 560px) {
+  .nav { align-items:flex-start; gap:.75rem; }
+  .nav__user { justify-content:flex-end; flex-wrap:wrap; }
+  .nav__user span { width:100%; text-align:right; }
+  .page { margin:1rem auto; }
+}
 
 button,
 input,

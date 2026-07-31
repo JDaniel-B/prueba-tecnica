@@ -4,8 +4,8 @@ import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { ApiError } from '@/lib/http'
 
-const email = ref('admin@norte.test')
-const password = ref('Sitec.2026')
+const email = ref('')
+const password = ref('')
 const error = ref('')
 const cargando = ref(false)
 const auth = useAuthStore()
@@ -27,9 +27,9 @@ async function enviar() {
     <form class="card login" @submit.prevent="enviar">
       <p class="eyebrow">Mesa de servicio</p><h1>Bienvenido a MesaSitec</h1>
       <p>Ingresa con las credenciales de tu organización.</p>
-      <div class="field"><label for="email">Correo</label><input id="email" v-model="email" data-testid="login-email" type="email" required></div>
-      <div class="field"><label for="password">Contraseña</label><input id="password" v-model="password" data-testid="login-password" type="password" required></div>
-      <p v-if="error" class="error" data-testid="login-error">{{ error }}</p>
+      <div class="field"><label for="email">Correo</label><input id="email" v-model="email" data-testid="login-email" type="email" autocomplete="username" placeholder="admin@norte.test" required></div>
+      <div class="field"><label for="password">Contraseña</label><input id="password" v-model="password" data-testid="login-password" type="password" autocomplete="current-password" required></div>
+      <p v-if="error" class="error" data-testid="login-error" role="alert">{{ error }}</p>
       <button class="btn" data-testid="login-submit" :disabled="cargando">{{ cargando ? 'Ingresando…' : 'Ingresar' }}</button>
     </form>
   </main>
