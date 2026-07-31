@@ -25,6 +25,15 @@
    El cálculo siempre parte de `FechaCreacion`, que es inmutable, y solo se repite
    cuando cambia la categoría o prioridad de una solicitud no terminal. Se preserva
    el SLA histórico de solicitudes resueltas, cerradas o canceladas.
+7. Las transiciones viven en métodos explícitos de `Solicitud` (`Asignar`,
+   `Iniciar`, `Resolver`, etc.). El servicio de aplicación decide permisos y valida
+   recursos externos, mientras el dominio impide saltos de estado incluso si se lo
+   invoca sin pasar por HTTP. Al reabrir se limpian la fecha y el motivo de la
+   resolución porque la solicitud vuelve a estar pendiente.
+8. El frontend usa `fetch` mediante un único módulo HTTP, Pinia para la sesión y
+   Vue Router para proteger rutas. Los DTO se escribieron en TypeScript estricto y
+   las páginas se dividieron por responsabilidad. Se agregó `GET /agentes` como
+   endpoint auxiliar para evitar IDs hardcodeados en el selector de asignación.
 
 ## Uso de IA
 

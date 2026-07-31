@@ -1,5 +1,6 @@
 using MesaSitec.Dominio.Entidades;
 using MesaSitec.Dominio.Enums;
+using MesaSitec.Dominio.Excepciones;
 
 namespace MesaSitec.UnitTests.Dominio;
 
@@ -102,6 +103,69 @@ public sealed class EntidadesTests
             categoriaSlaHoras: 4);
 
         Assert.Equal(fechaLimiteOriginal, solicitud.FechaLimiteSla);
+    }
+
+    [Fact]
+    public void Solicitud_RecorreFlujoFelizHastaCerrar()
+    {
+        var solicitud = CrearSolicitud();
+        var agenteId = Guid.NewGuid();
+        var fechaResolucion = FechaBase.AddHours(3);
+
+        solicitud.Asignar(agenteId);
+        Assert.Equal(EstadoSolicitud.Asignada, solicitud.Estado);
+        Assert.Equal(agenteId, solicitud.AgenteId);
+
+        solicitud.Iniciar();
+        Assert.Equal(EstadoSolicitud.EnProceso, solicitud.Estado);
+
+        solicitud.Resolver(
+            "La incidencia se corrigió y fue validada por el usuario.",
+            fechaResolucion);
+        Assert.Equal(EstadoSolicitud.Resuelta, solicitud.Estado);
+        Assert.Equal(fechaResolucion, solicitud.FechaResolucion);
+
+        solicitud.Cerrar();
+        Assert.Equal(EstadoSolicitud.Cerrada, solicitud.Estado);
+    }
+
+    [Fact]
+    public void Solicitud_ReabrirLimpiaDatosDeResolucion()
+    {
+        var solicitud = CrearSolicitud();
+        solicitud.Asignar(Guid.NewGuid());
+        solicitud.Iniciar();
+        solicitud.Resolver(
+            "La incidencia se corrigió y fue validada por el usuario.",
+            FechaBase.AddHours(3));
+
+        solicitud.Reabrir();
+
+        Assert.Equal(EstadoSolicitud.EnProceso, solicitud.Estado);
+        Assert.Null(solicitud.FechaResolucion);
+        Assert.Null(solicitud.MotivoResolucion);
+    }
+
+    [Fact]
+    public void Solicitud_RechazaTransicionFueraDeLaMaquinaDeEstados()
+    {
+        var solicitud = CrearSolicitud();
+
+        var accion = solicitud.Iniciar;
+
+        Assert.Throws<TransicionSolicitudInvalidaException>(accion);
+        Assert.Equal(EstadoSolicitud.Nueva, solicitud.Estado);
+    }
+
+    [Fact]
+    public void Solicitud_CancelarGuardaMotivoNormalizado()
+    {
+        var solicitud = CrearSolicitud();
+
+        solicitud.Cancelar("  Solicitud creada por duplicado.  ");
+
+        Assert.Equal(EstadoSolicitud.Cancelada, solicitud.Estado);
+        Assert.Equal("Solicitud creada por duplicado.", solicitud.MotivoCancelacion);
     }
 
     private static Solicitud CrearSolicitud(string titulo = "No puedo acceder al portal")

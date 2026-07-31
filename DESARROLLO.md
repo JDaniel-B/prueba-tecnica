@@ -107,6 +107,25 @@ Content-Type: application/json
 en estado `Nueva`. Si cambia la categoría o prioridad de una solicitud no
 terminal, el SLA se recalcula desde su fecha de creación original.
 
+El flujo de estados se ejecuta desde el detalle de Vue o desde Swagger con:
+
+```http
+POST /api/v1/solicitudes/{id}/transiciones
+Content-Type: application/json
+
+{ "accion": "asignar", "agenteId": "10000000-0000-0000-0000-000000000002" }
+{ "accion": "iniciar" }
+{ "accion": "resolver", "motivo": "Se corrigió el incidente y el usuario validó el acceso." }
+```
+
+También están disponibles `cerrar`, `reabrir` y `cancelar`. El endpoint auxiliar
+`GET /api/v1/agentes` lista únicamente administradores y agentes activos del
+tenant actual para alimentar el selector de asignación.
+
+El frontend en `http://localhost:5173` incluye login, listado con filtros y
+paginación server-side, creación, edición, detalle y acciones por estado. El
+cliente HTTP centralizado agrega el JWT y elimina la sesión si recibe un `401`.
+
 Las fechas se calculan a partir de `SEED_FECHA_BASE`. Su valor predeterminado es
 `2026-01-15T08:00:00Z` y solo se utiliza cuando la base todavía está vacía.
 
