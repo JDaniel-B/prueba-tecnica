@@ -1,4 +1,5 @@
 using MesaSitec.Dominio.Enums;
+using MesaSitec.Dominio.Excepciones;
 using MesaSitec.Dominio.Servicios;
 
 namespace MesaSitec.Dominio.Entidades;
@@ -126,6 +127,73 @@ public sealed class Solicitud
                 FechaCreacion,
                 categoriaSlaHoras,
                 prioridad);
+        }
+    }
+
+    public void Asignar(Guid agenteId)
+    {
+        ValidarIdentificador(agenteId, nameof(agenteId));
+        ValidarTransicion(
+            "asignar",
+            EstadoSolicitud.Nueva,
+            EstadoSolicitud.Asignada,
+            EstadoSolicitud.EnProceso);
+
+        AgenteId = agenteId;
+        Estado = EstadoSolicitud.Asignada;
+    }
+
+    public void Iniciar()
+    {
+        ValidarTransicion("iniciar", EstadoSolicitud.Asignada);
+        Estado = EstadoSolicitud.EnProceso;
+    }
+
+    public void Resolver(string motivo, DateTime fechaResolucion)
+    {
+        ValidarTransicion("resolver", EstadoSolicitud.EnProceso);
+        ValidarTexto(motivo, nameof(motivo), 20, 4000);
+        ValidarFechaUtc(fechaResolucion, nameof(fechaResolucion));
+
+        Estado = EstadoSolicitud.Resuelta;
+        MotivoResolucion = motivo.Trim();
+        FechaResolucion = fechaResolucion;
+    }
+
+    public void Cerrar()
+    {
+        ValidarTransicion("cerrar", EstadoSolicitud.Resuelta);
+        Estado = EstadoSolicitud.Cerrada;
+    }
+
+    public void Reabrir()
+    {
+        ValidarTransicion("reabrir", EstadoSolicitud.Resuelta);
+        Estado = EstadoSolicitud.EnProceso;
+        MotivoResolucion = null;
+        FechaResolucion = null;
+    }
+
+    public void Cancelar(string motivo)
+    {
+        ValidarTransicion(
+            "cancelar",
+            EstadoSolicitud.Nueva,
+            EstadoSolicitud.Asignada,
+            EstadoSolicitud.EnProceso);
+        ValidarTexto(motivo, nameof(motivo), 10, 4000);
+
+        Estado = EstadoSolicitud.Cancelada;
+        MotivoCancelacion = motivo.Trim();
+    }
+
+    private void ValidarTransicion(
+        string accion,
+        params EstadoSolicitud[] estadosPermitidos)
+    {
+        if (!estadosPermitidos.Contains(Estado))
+        {
+            throw new TransicionSolicitudInvalidaException(Estado, accion);
         }
     }
 

@@ -1,4 +1,5 @@
 using MesaSitec.Aplicacion.Excepciones;
+using MesaSitec.Dominio.Excepciones;
 using Microsoft.AspNetCore.Diagnostics;
 
 namespace MesaSitec.Api.Errores;
@@ -37,6 +38,24 @@ public sealed class GlobalExceptionHandler(
                 "Operación no permitida",
                 exception.Message,
                 "operacion-no-permitida"),
+            TransicionSolicitudInvalidaException => new DatosProblema(
+                StatusCodes.Status409Conflict,
+                "TRANSICION_INVALIDA",
+                "Transición inválida",
+                exception.Message,
+                "transicion-invalida"),
+            AgenteInvalidoException => new DatosProblema(
+                StatusCodes.Status422UnprocessableEntity,
+                "AGENTE_INVALIDO",
+                "Agente inválido",
+                exception.Message,
+                "agente-invalido"),
+            MotivoRequeridoException => new DatosProblema(
+                StatusCodes.Status422UnprocessableEntity,
+                "MOTIVO_REQUERIDO",
+                "Motivo requerido",
+                exception.Message,
+                "motivo-requerido"),
             ValidacionException validacion => new DatosProblema(
                 StatusCodes.Status422UnprocessableEntity,
                 "VALIDACION",
