@@ -12,7 +12,9 @@
     "build": "npm run build:api && npm run build:web",
     "build:api": "dotnet build backend/MesaSitec.sln --no-restore",
     "build:web": "npm run build --workspace frontend",
-    "test": "dotnet test backend/MesaSitec.sln --no-restore",
+    "test": "npm run test:api && npm run test:web",
+    "test:api": "dotnet test backend/MesaSitec.sln --no-restore",
+    "test:web": "npm run test --workspace frontend",
     "lint": "npm run lint --workspace frontend"
   },
   "devDependencies": {

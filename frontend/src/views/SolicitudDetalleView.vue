@@ -5,6 +5,7 @@ import { api } from '@/services/api'
 import { ApiError } from '@/lib/http'
 import { useAuthStore } from '@/stores/auth'
 import { useToastStore } from '@/stores/toast'
+import { accionesPermitidas, puedeEditarSolicitud } from '@/domain/permisosSolicitud'
 import type { Accion, SolicitudDetalle, UsuarioResumen } from '@/types/api'
 
 const route=useRoute(), auth=useAuthStore(), toast=useToastStore()
@@ -12,8 +13,8 @@ const solicitud=ref<SolicitudDetalle>(), agentes=ref<UsuarioResumen[]>([]), carg
 const accion=ref<Accion>(), agenteId=ref(''), motivo=ref(''), modalError=ref(''), enviando=ref(false)
 const id=String(route.params.id)
 const esStaff=computed(()=>auth.usuario?.rol==='Admin'||auth.usuario?.rol==='Agente')
-const puedeEditar=computed(()=>Boolean(solicitud.value&&(esStaff.value||solicitud.value.estado==='Nueva')))
-const acciones=computed<Accion[]>(()=>{const s=solicitud.value;if(!s)return[];const a:Accion[]=[];if(esStaff.value&&['Nueva','Asignada','EnProceso'].includes(s.estado))a.push('asignar');if(esStaff.value&&s.estado==='Asignada')a.push('iniciar');if(esStaff.value&&s.estado==='EnProceso')a.push('resolver');if(s.estado==='Resuelta'&&(esStaff.value||auth.usuario?.rol==='Solicitante'))a.push('cerrar');if(esStaff.value&&s.estado==='Resuelta')a.push('reabrir');if(auth.usuario?.rol==='Admin'&&['Nueva','Asignada','EnProceso'].includes(s.estado))a.push('cancelar');return a})
+const puedeEditar=computed(()=>Boolean(solicitud.value&&auth.usuario&&puedeEditarSolicitud(solicitud.value.estado,auth.usuario.rol)))
+const acciones=computed<Accion[]>(()=>solicitud.value&&auth.usuario?accionesPermitidas(solicitud.value.estado,auth.usuario.rol):[])
 const requiereMotivo=computed(()=>accion.value==='resolver'||accion.value==='cancelar')
 const etiquetas:Record<Accion,string>={asignar:'Asignar',iniciar:'Iniciar atención',resolver:'Resolver',cerrar:'Cerrar',reabrir:'Reabrir',cancelar:'Cancelar'}
 function fecha(v:string|null){return v?new Intl.DateTimeFormat('es-GT',{dateStyle:'long',timeStyle:'short'}).format(new Date(v)):'—'}

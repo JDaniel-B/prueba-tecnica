@@ -34,6 +34,11 @@
    Vue Router para proteger rutas. Los DTO se escribieron en TypeScript estricto y
    las páginas se dividieron por responsabilidad. Se agregó `GET /agentes` como
    endpoint auxiliar para evitar IDs hardcodeados en el selector de asignación.
+9. Se eligió Vitest con Vue Test Utils y jsdom para probar el frontend porque se
+   integra con Vite y permite comprobar componentes sin mantener una segunda
+   configuración de compilación. La decisión de qué acciones mostrar se extrajo a
+   una función pura compartida por la vista y sus pruebas, evitando duplicar la
+   matriz de permisos en el test.
 
 ## Uso de IA
 

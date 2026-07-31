@@ -126,6 +126,17 @@ El frontend en `http://localhost:5173` incluye login, listado con filtros y
 paginación server-side, creación, edición, detalle y acciones por estado. El
 cliente HTTP centralizado agrega el JWT y elimina la sesión si recibe un `401`.
 
+Las pruebas se ejecutan desde la raíz con un solo comando:
+
+```sh
+npm test
+```
+
+El script corre primero xUnit para el backend y después Vitest para Vue. Para
+ejecutarlas por separado se pueden usar `npm run test:api` y
+`npm run test:web`. Las pruebas Vue verifican validación del formulario,
+selectores obligatorios y la matriz de acciones visible por rol y estado.
+
 Las fechas se calculan a partir de `SEED_FECHA_BASE`. Su valor predeterminado es
 `2026-01-15T08:00:00Z` y solo se utiliza cuando la base todavía está vacía.
 
@@ -150,5 +161,7 @@ npm run dev:api
 npm run dev:web
 npm run build
 npm test
+npm run test:api
+npm run test:web
 npm run lint
 ```
