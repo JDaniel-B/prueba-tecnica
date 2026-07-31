@@ -51,6 +51,8 @@ npm run lint
 detallada está en [DESARROLLO.md](DESARROLLO.md) y las decisiones de arquitectura
 en [DECISIONES.md](DECISIONES.md). La última ejecución reproducible del checklist
 está documentada en [ACEPTACION.md](ACEPTACION.md).
+Para la revisión previa a entregar usa [REVISION_MANUAL.md](REVISION_MANUAL.md);
+para preparar la conversación técnica consulta [GUIA_ENTREVISTA.md](GUIA_ENTREVISTA.md).
 
 ## Funcionalidad implementada
 

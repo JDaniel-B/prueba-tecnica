@@ -44,7 +44,7 @@ de desarrollo. En el arranque se verificó que:
 Comandos ejecutados satisfactoriamente:
 
 ```sh
-npm test       # 85 pruebas xUnit + 9 pruebas Vitest
+npm test       # 85 pruebas xUnit + 12 pruebas Vitest
 npm run build  # .NET, vue-tsc y Vite
 npm run lint   # ESLint
 ```
@@ -58,3 +58,7 @@ y su corrección automática requiere un downgrade forzado.
 Antes de entregar, el propietario del repositorio debe confirmar en GitHub que
 el usuario `osanchezm` tiene acceso. Esta acción no puede verificarse desde una
 instalación local.
+
+La inspección automatizada del navegador depende del entorno del evaluador. El
+recorrido visual por rol que debe ejecutarse antes de entregar está en
+`REVISION_MANUAL.md`.

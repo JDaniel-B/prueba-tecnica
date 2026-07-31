@@ -15,10 +15,13 @@ const router = createRouter({
   ],
 })
 
-router.beforeEach((to) => {
+router.beforeEach(async (to) => {
   const auth = useAuthStore()
-  if (!to.meta.publica && !auth.autenticado) return { name: 'login', query: { redirect: to.fullPath } }
-  if (to.name === 'login' && auth.autenticado) return { name: 'solicitudes' }
+  if (!to.meta.publica && auth.autenticado && !auth.usuario) await auth.restaurar()
+  if (!to.meta.publica && (!auth.autenticado || !auth.usuario)) {
+    return { name: 'login', query: { redirect: to.fullPath } }
+  }
+  if (to.name === 'login' && auth.autenticado && auth.usuario) return { name: 'solicitudes' }
 })
 
 export default router
