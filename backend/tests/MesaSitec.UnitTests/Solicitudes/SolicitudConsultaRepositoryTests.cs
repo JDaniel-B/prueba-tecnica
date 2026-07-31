@@ -18,6 +18,57 @@ public sealed class SolicitudConsultaRepositoryTests
         Guid.Parse("00000000-0000-0000-0000-000000000001");
     private static readonly Guid UsuarioNorte1Id =
         Guid.Parse("10000000-0000-0000-0000-000000000004");
+    private static readonly Guid SolicitudNorte14Id =
+        Guid.Parse("40000000-0000-0000-0000-000000000014");
+    private static readonly Guid TenantSurId =
+        Guid.Parse("00000000-0000-0000-0000-000000000002");
+
+    [Fact]
+    public async Task ObtenerDetalle_DevuelveCamposCompletosYFechasUtc()
+    {
+        await using var baseDatos = await BaseDatosSemilla.CrearAsync();
+        var repositorio = new SolicitudConsultaRepository(baseDatos.Context);
+
+        var resultado = await repositorio.ObtenerDetalleAsync(
+            SolicitudNorte14Id,
+            TenantNorteId,
+            FechaBase);
+
+        Assert.NotNull(resultado);
+        Assert.Equal("SOL-2026-00014", resultado.Codigo);
+        Assert.Contains("Descripción determinista", resultado.Descripcion);
+        Assert.Equal(EstadoSolicitud.Resuelta, resultado.Estado);
+        Assert.Equal(PrioridadSolicitud.Media, resultado.Prioridad);
+        Assert.Equal("Requerimiento", resultado.Categoria.Nombre);
+        Assert.Equal("Solicitante Norte Dos", resultado.Solicitante.Nombre);
+        Assert.Equal("Agente Norte Dos", resultado.Agente?.Nombre);
+        Assert.NotNull(resultado.FechaResolucion);
+        Assert.NotNull(resultado.MotivoResolucion);
+        Assert.Null(resultado.MotivoCancelacion);
+        Assert.False(resultado.Vencida);
+        Assert.Equal(DateTimeKind.Utc, resultado.FechaCreacion.Kind);
+        Assert.Equal(DateTimeKind.Utc, resultado.FechaLimiteSla.Kind);
+        Assert.Equal(DateTimeKind.Utc, resultado.FechaResolucion?.Kind);
+    }
+
+    [Fact]
+    public async Task ObtenerDetalle_OtroTenantOIdInexistenteDevuelveNull()
+    {
+        await using var baseDatos = await BaseDatosSemilla.CrearAsync();
+        var repositorio = new SolicitudConsultaRepository(baseDatos.Context);
+
+        var otroTenant = await repositorio.ObtenerDetalleAsync(
+            SolicitudNorte14Id,
+            TenantSurId,
+            FechaBase);
+        var inexistente = await repositorio.ObtenerDetalleAsync(
+            Guid.NewGuid(),
+            TenantNorteId,
+            FechaBase);
+
+        Assert.Null(otroTenant);
+        Assert.Null(inexistente);
+    }
 
     [Fact]
     public async Task Listar_AislaTenantYPaginaEnElServidor()

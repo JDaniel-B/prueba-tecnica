@@ -14,7 +14,9 @@
 4. Las consultas multi-tenant reciben el `tenantId` desde el token y lo aplican como
    primer predicado en el repositorio. Para un usuario `Solicitante`, el servicio
    agrega además su `usuarioId`. Se descartó aceptar el tenant desde parámetros HTTP
-   porque permitiría consultar otra organización manipulando la petición.
+   porque permitiría consultar otra organización manipulando la petición. En
+   consultas por ID, un recurso de otro tenant se trata como inexistente (`404`);
+   las restricciones de rol dentro del mismo tenant se informan como `403`.
 
 ## Uso de IA
 

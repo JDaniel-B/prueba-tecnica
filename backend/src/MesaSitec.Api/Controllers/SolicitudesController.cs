@@ -34,4 +34,26 @@ public sealed class SolicitudesController(
 
         return Ok(response);
     }
+
+    [HttpGet("{id}")]
+    [ProducesResponseType<SolicitudDetalleResponse>(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<SolicitudDetalleResponse>> GetById(
+        Guid id,
+        CancellationToken cancellationToken)
+    {
+        var tenantId = User.ObtenerGuidRequerido("tenantId");
+        var usuarioId = User.ObtenerGuidRequerido(JwtRegisteredClaimNames.Sub);
+        var rol = User.ObtenerRolRequerido();
+        var response = await consultaService.ObtenerDetalleAsync(
+            id,
+            tenantId,
+            usuarioId,
+            rol,
+            cancellationToken);
+
+        return Ok(response);
+    }
 }

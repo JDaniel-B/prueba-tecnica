@@ -11,4 +11,11 @@ public interface ISolicitudConsultaService
         Guid usuarioId,
         RolUsuario rol,
         CancellationToken cancellationToken = default);
+
+    Task<SolicitudDetalleResponse> ObtenerDetalleAsync(
+        Guid id,
+        Guid tenantId,
+        Guid usuarioId,
+        RolUsuario rol,
+        CancellationToken cancellationToken = default);
 }

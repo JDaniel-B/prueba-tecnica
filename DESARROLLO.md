@@ -55,6 +55,7 @@ Con la sesión autorizada también puedes probar el listado paginado:
 GET /api/v1/categorias
 GET /api/v1/solicitudes?page=1&pageSize=20&sort=-fechaCreacion
 GET /api/v1/solicitudes?estado=EnProceso&prioridad=Alta&vencidas=true
+GET /api/v1/solicitudes/40000000-0000-0000-0000-000000000014
 ```
 
 `GET /api/v1/categorias` devuelve las categorías activas que pueden usarse en
@@ -63,6 +64,11 @@ los filtros y formularios.
 Un usuario `Admin` o `Agente` ve las solicitudes de su organización. Un usuario
 `Solicitante` ve únicamente las que él creó; el servidor obtiene ambos límites
 desde el JWT, nunca desde parámetros enviados por el cliente.
+
+En el detalle, un recurso inexistente o perteneciente a otro tenant responde
+`404 / RECURSO_NO_ENCONTRADO`. Un usuario `Solicitante` que intenta consultar
+una solicitud ajena de su propia organización recibe
+`403 / OPERACION_NO_PERMITIDA`.
 
 Las fechas se calculan a partir de `SEED_FECHA_BASE`. Su valor predeterminado es
 `2026-01-15T08:00:00Z` y solo se utiliza cuando la base todavía está vacía.
