@@ -55,6 +55,34 @@ public sealed class SolicitudConsultaService(
         return repositorio.ListarAsync(filtro, cancellationToken);
     }
 
+    public async Task<SolicitudDetalleResponse> ObtenerDetalleAsync(
+        Guid id,
+        Guid tenantId,
+        Guid usuarioId,
+        RolUsuario rol,
+        CancellationToken cancellationToken = default)
+    {
+        var solicitud = await repositorio.ObtenerDetalleAsync(
+            id,
+            tenantId,
+            timeProvider.GetUtcNow().UtcDateTime,
+            cancellationToken);
+        if (solicitud is null)
+        {
+            throw new RecursoNoEncontradoException(
+                "La solicitud no existe.");
+        }
+
+        if (rol == RolUsuario.Solicitante
+            && solicitud.Solicitante.Id != usuarioId)
+        {
+            throw new OperacionNoPermitidaException(
+                "El usuario no puede consultar esta solicitud.");
+        }
+
+        return solicitud;
+    }
+
     private static void Validar(ListarSolicitudesRequest request)
     {
         if (request.Estado.HasValue

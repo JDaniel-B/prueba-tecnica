@@ -31,6 +31,12 @@ public sealed class GlobalExceptionHandler(
                 "Parámetro inválido",
                 exception.Message,
                 "parametro-invalido"),
+            OperacionNoPermitidaException => new DatosProblema(
+                StatusCodes.Status403Forbidden,
+                "OPERACION_NO_PERMITIDA",
+                "Operación no permitida",
+                exception.Message,
+                "operacion-no-permitida"),
             _ => new DatosProblema(
                 StatusCodes.Status500InternalServerError,
                 "ERROR_INTERNO",

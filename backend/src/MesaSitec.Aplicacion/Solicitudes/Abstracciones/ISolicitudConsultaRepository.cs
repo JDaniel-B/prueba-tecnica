@@ -8,4 +8,10 @@ public interface ISolicitudConsultaRepository
     Task<PaginaResponse<SolicitudListadoResponse>> ListarAsync(
         FiltroSolicitudes filtro,
         CancellationToken cancellationToken = default);
+
+    Task<SolicitudDetalleResponse?> ObtenerDetalleAsync(
+        Guid id,
+        Guid tenantId,
+        DateTime ahoraUtc,
+        CancellationToken cancellationToken = default);
 }

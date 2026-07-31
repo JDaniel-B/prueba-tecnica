@@ -11,6 +11,72 @@ namespace MesaSitec.Infraestructura.Solicitudes;
 public sealed class SolicitudConsultaRepository(
     MesaSitecDbContext dbContext) : ISolicitudConsultaRepository
 {
+    public async Task<SolicitudDetalleResponse?> ObtenerDetalleAsync(
+        Guid id,
+        Guid tenantId,
+        DateTime ahoraUtc,
+        CancellationToken cancellationToken = default)
+    {
+        var detalle = await (
+            from solicitud in dbContext.Solicitudes
+                .AsNoTracking()
+                .Where(item => item.Id == id && item.TenantId == tenantId)
+            join categoria in dbContext.Categorias.AsNoTracking()
+                on new { solicitud.TenantId, Id = solicitud.CategoriaId }
+                equals new { categoria.TenantId, categoria.Id }
+            join solicitante in dbContext.Usuarios.AsNoTracking()
+                on new { solicitud.TenantId, Id = solicitud.SolicitanteId }
+                equals new { solicitante.TenantId, solicitante.Id }
+            join agente in dbContext.Usuarios.AsNoTracking()
+                on new
+                {
+                    solicitud.TenantId,
+                    Id = solicitud.AgenteId
+                }
+                equals new
+                {
+                    agente.TenantId,
+                    Id = (Guid?)agente.Id
+                }
+                into agentes
+            from agente in agentes.DefaultIfEmpty()
+            select new SolicitudDetalleResponse(
+                solicitud.Id,
+                solicitud.Codigo,
+                solicitud.Titulo,
+                solicitud.Descripcion,
+                solicitud.Estado,
+                solicitud.Prioridad,
+                new CategoriaResumenResponse(categoria.Id, categoria.Nombre),
+                new UsuarioResumenResponse(
+                    solicitante.Id,
+                    solicitante.Nombre),
+                agente == null
+                    ? null
+                    : new UsuarioResumenResponse(agente.Id, agente.Nombre),
+                solicitud.FechaCreacion,
+                solicitud.FechaLimiteSla,
+                solicitud.FechaResolucion,
+                solicitud.MotivoResolucion,
+                solicitud.MotivoCancelacion,
+                solicitud.FechaLimiteSla < ahoraUtc
+                    && solicitud.Estado != EstadoSolicitud.Resuelta
+                    && solicitud.Estado != EstadoSolicitud.Cerrada
+                    && solicitud.Estado != EstadoSolicitud.Cancelada))
+            .SingleOrDefaultAsync(cancellationToken);
+
+        return detalle is null
+            ? null
+            : detalle with
+            {
+                FechaCreacion = ComoUtc(detalle.FechaCreacion),
+                FechaLimiteSla = ComoUtc(detalle.FechaLimiteSla),
+                FechaResolucion = detalle.FechaResolucion.HasValue
+                    ? ComoUtc(detalle.FechaResolucion.Value)
+                    : null
+            };
+    }
+
     public async Task<PaginaResponse<SolicitudListadoResponse>> ListarAsync(
         FiltroSolicitudes filtro,
         CancellationToken cancellationToken = default)
@@ -74,12 +140,8 @@ public sealed class SolicitudConsultaRepository(
         var items = itemsBase
             .Select(item => item with
             {
-                FechaCreacion = DateTime.SpecifyKind(
-                    item.FechaCreacion,
-                    DateTimeKind.Utc),
-                FechaLimiteSla = DateTime.SpecifyKind(
-                    item.FechaLimiteSla,
-                    DateTimeKind.Utc)
+                FechaCreacion = ComoUtc(item.FechaCreacion),
+                FechaLimiteSla = ComoUtc(item.FechaLimiteSla)
             })
             .ToList();
         return new PaginaResponse<SolicitudListadoResponse>(
@@ -195,5 +257,10 @@ public sealed class SolicitudConsultaRepository(
             .Replace("_", @"\_", StringComparison.Ordinal);
 
         return $"%{valorEscapado}%";
+    }
+
+    private static DateTime ComoUtc(DateTime fecha)
+    {
+        return DateTime.SpecifyKind(fecha, DateTimeKind.Utc);
     }
 }

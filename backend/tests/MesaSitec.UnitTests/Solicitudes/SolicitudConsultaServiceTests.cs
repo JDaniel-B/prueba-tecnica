@@ -108,9 +108,96 @@ public sealed class SolicitudConsultaServiceTests
                 RolUsuario.Admin));
     }
 
-    private sealed class RepositorioCaptura : ISolicitudConsultaRepository
+    [Theory]
+    [InlineData(RolUsuario.Admin)]
+    [InlineData(RolUsuario.Agente)]
+    [InlineData(RolUsuario.Solicitante)]
+    public async Task ObtenerDetalle_DevuelveSolicitudCuandoElRolTieneAcceso(
+        RolUsuario rol)
+    {
+        var usuarioId = Guid.NewGuid();
+        var detalle = CrearDetalle(
+            rol == RolUsuario.Solicitante ? usuarioId : Guid.NewGuid());
+        var repositorio = new RepositorioCaptura(detalle);
+        var servicio = new SolicitudConsultaService(
+            repositorio,
+            new RelojFijo(Ahora));
+        var tenantId = Guid.NewGuid();
+
+        var resultado = await servicio.ObtenerDetalleAsync(
+            detalle.Id,
+            tenantId,
+            usuarioId,
+            rol);
+
+        Assert.Same(detalle, resultado);
+        Assert.Equal(detalle.Id, repositorio.UltimoDetalleId);
+        Assert.Equal(tenantId, repositorio.UltimoDetalleTenantId);
+        Assert.Equal(Ahora.UtcDateTime, repositorio.UltimoDetalleAhoraUtc);
+    }
+
+    [Fact]
+    public async Task ObtenerDetalle_SolicitanteAjenoLanzaOperacionNoPermitida()
+    {
+        var detalle = CrearDetalle(Guid.NewGuid());
+        var servicio = new SolicitudConsultaService(
+            new RepositorioCaptura(detalle),
+            new RelojFijo(Ahora));
+
+        await Assert.ThrowsAsync<OperacionNoPermitidaException>(
+            () => servicio.ObtenerDetalleAsync(
+                detalle.Id,
+                Guid.NewGuid(),
+                Guid.NewGuid(),
+                RolUsuario.Solicitante));
+    }
+
+    [Fact]
+    public async Task ObtenerDetalle_InexistenteLanzaRecursoNoEncontrado()
+    {
+        var servicio = new SolicitudConsultaService(
+            new RepositorioCaptura(),
+            new RelojFijo(Ahora));
+
+        await Assert.ThrowsAsync<RecursoNoEncontradoException>(
+            () => servicio.ObtenerDetalleAsync(
+                Guid.NewGuid(),
+                Guid.NewGuid(),
+                Guid.NewGuid(),
+                RolUsuario.Admin));
+    }
+
+    private static SolicitudDetalleResponse CrearDetalle(Guid solicitanteId)
+    {
+        return new SolicitudDetalleResponse(
+            Guid.NewGuid(),
+            "SOL-2026-00001",
+            "No puedo acceder al portal",
+            "El portal rechaza mis credenciales de acceso.",
+            EstadoSolicitud.Nueva,
+            PrioridadSolicitud.Alta,
+            new CategoriaResumenResponse(Guid.NewGuid(), "Incidente"),
+            new UsuarioResumenResponse(solicitanteId, "Usuario solicitante"),
+            null,
+            Ahora.UtcDateTime,
+            Ahora.AddHours(6).UtcDateTime,
+            null,
+            null,
+            null,
+            false);
+    }
+
+    private sealed class RepositorioCaptura(
+        SolicitudDetalleResponse? detalle = null)
+        : ISolicitudConsultaRepository
     {
         public FiltroSolicitudes? UltimoFiltro { get; private set; }
+
+        public Guid? UltimoDetalleId { get; private set; }
+
+        public Guid? UltimoDetalleTenantId { get; private set; }
+
+        public DateTime? UltimoDetalleAhoraUtc { get; private set; }
 
         public Task<PaginaResponse<SolicitudListadoResponse>> ListarAsync(
             FiltroSolicitudes filtro,
@@ -124,6 +211,18 @@ public sealed class SolicitudConsultaServiceTests
                     filtro.PageSize,
                     0,
                     0));
+        }
+
+        public Task<SolicitudDetalleResponse?> ObtenerDetalleAsync(
+            Guid id,
+            Guid tenantId,
+            DateTime ahoraUtc,
+            CancellationToken cancellationToken = default)
+        {
+            UltimoDetalleId = id;
+            UltimoDetalleTenantId = tenantId;
+            UltimoDetalleAhoraUtc = ahoraUtc;
+            return Task.FromResult(detalle);
         }
     }
 
