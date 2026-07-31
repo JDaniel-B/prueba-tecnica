@@ -12,14 +12,15 @@ namespace MesaSitec.Api.Controllers;
 [Route("api/v1/solicitudes")]
 public sealed class SolicitudesController(
     ISolicitudConsultaService consultaService,
-    ISolicitudCreacionService creacionService) : ControllerBase
+    ISolicitudCreacionService creacionService,
+    ISolicitudActualizacionService actualizacionService) : ControllerBase
 {
     [HttpPost]
     [ProducesResponseType<SolicitudDetalleResponse>(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
     public async Task<ActionResult<SolicitudDetalleResponse>> Post(
-        CrearSolicitudRequest request,
+        SolicitudEscrituraRequest request,
         CancellationToken cancellationToken)
     {
         var tenantId = User.ObtenerGuidRequerido("tenantId");
@@ -34,6 +35,31 @@ public sealed class SolicitudesController(
             nameof(GetById),
             new { id = response.Id },
             response);
+    }
+
+    [HttpPut("{id}")]
+    [ProducesResponseType<SolicitudDetalleResponse>(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
+    public async Task<ActionResult<SolicitudDetalleResponse>> Put(
+        Guid id,
+        SolicitudEscrituraRequest request,
+        CancellationToken cancellationToken)
+    {
+        var tenantId = User.ObtenerGuidRequerido("tenantId");
+        var usuarioId = User.ObtenerGuidRequerido(JwtRegisteredClaimNames.Sub);
+        var rol = User.ObtenerRolRequerido();
+        var response = await actualizacionService.ActualizarAsync(
+            id,
+            request,
+            tenantId,
+            usuarioId,
+            rol,
+            cancellationToken);
+
+        return Ok(response);
     }
 
     [HttpGet]

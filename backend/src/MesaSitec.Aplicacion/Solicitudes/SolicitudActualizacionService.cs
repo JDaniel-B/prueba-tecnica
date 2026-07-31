@@ -1,21 +1,42 @@
+using MesaSitec.Aplicacion.Excepciones;
 using MesaSitec.Aplicacion.Solicitudes.Abstracciones;
 using MesaSitec.Aplicacion.Solicitudes.Contratos;
-using MesaSitec.Dominio.Entidades;
+using MesaSitec.Dominio.Enums;
 
 namespace MesaSitec.Aplicacion.Solicitudes;
 
-public sealed class SolicitudCreacionService(
+public sealed class SolicitudActualizacionService(
     ISolicitudEscrituraRepository escrituraRepository,
     ISolicitudConsultaRepository consultaRepository,
-    TimeProvider timeProvider) : ISolicitudCreacionService
+    TimeProvider timeProvider) : ISolicitudActualizacionService
 {
-    public async Task<SolicitudDetalleResponse> CrearAsync(
+    public async Task<SolicitudDetalleResponse> ActualizarAsync(
+        Guid id,
         SolicitudEscrituraRequest request,
         Guid tenantId,
         Guid usuarioId,
+        RolUsuario rol,
         CancellationToken cancellationToken = default)
     {
         ValidadorSolicitudEscritura.Validar(request);
+
+        var solicitud = await escrituraRepository.BuscarAsync(
+            id,
+            tenantId,
+            cancellationToken);
+        if (solicitud is null)
+        {
+            throw new RecursoNoEncontradoException(
+                "La solicitud no existe.");
+        }
+
+        if (rol == RolUsuario.Solicitante
+            && (solicitud.SolicitanteId != usuarioId
+                || solicitud.Estado != EstadoSolicitud.Nueva))
+        {
+            throw new OperacionNoPermitidaException(
+                "El usuario no puede editar esta solicitud.");
+        }
 
         var categoria = await escrituraRepository.BuscarCategoriaActivaAsync(
             request.CategoriaId!.Value,
@@ -28,37 +49,20 @@ public sealed class SolicitudCreacionService(
                 "La categoría no existe, está inactiva o pertenece a otra organización.");
         }
 
-        var fechaCreacion = timeProvider.GetUtcNow().UtcDateTime;
-        var correlativo = await escrituraRepository.ObtenerSiguienteCorrelativoAsync(
-            tenantId,
-            fechaCreacion.Year,
-            cancellationToken);
-        if (correlativo > 99999)
-        {
-            throw new InvalidOperationException(
-                "Se agotó el correlativo anual de solicitudes.");
-        }
-
-        var solicitud = new Solicitud(
-            Guid.NewGuid(),
-            tenantId,
-            $"SOL-{fechaCreacion.Year}-{correlativo:00000}",
+        solicitud.Actualizar(
             request.Titulo!,
             request.Descripcion!,
             categoria.Id,
             request.Prioridad!.Value,
-            usuarioId,
-            fechaCreacion,
             categoria.SlaHoras);
-        await escrituraRepository.AgregarAsync(solicitud, cancellationToken);
+        await escrituraRepository.GuardarCambiosAsync(cancellationToken);
 
         return await consultaRepository.ObtenerDetalleAsync(
                 solicitud.Id,
                 tenantId,
-                fechaCreacion,
+                timeProvider.GetUtcNow().UtcDateTime,
                 cancellationToken)
             ?? throw new InvalidOperationException(
-                "No fue posible recuperar la solicitud creada.");
+                "No fue posible recuperar la solicitud actualizada.");
     }
-
 }

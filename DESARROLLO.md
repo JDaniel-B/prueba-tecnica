@@ -88,6 +88,25 @@ El servidor obtiene tenant y solicitante desde el JWT, genera el código, calcul
 el SLA y responde `201` con una cabecera `Location`. Los IDs de categoría del
 ejemplo pertenecen a los datos semilla de Cooperativa Norte.
 
+Para actualizar una solicitud existente se envía el mismo contrato de escritura:
+
+```http
+PUT /api/v1/solicitudes/40000000-0000-0000-0000-000000000001
+Content-Type: application/json
+
+{
+  "titulo": "No puedo acceder al portal desde ayer",
+  "descripcion": "El portal continúa rechazando mis credenciales de acceso.",
+  "categoriaId": "20000000-0000-0000-0000-000000000001",
+  "prioridad": "Critica"
+}
+```
+
+`Admin` y `Agente` pueden editar solicitudes de su organización. Un
+`Solicitante` únicamente puede editar una solicitud propia mientras permanezca
+en estado `Nueva`. Si cambia la categoría o prioridad de una solicitud no
+terminal, el SLA se recalcula desde su fecha de creación original.
+
 Las fechas se calculan a partir de `SEED_FECHA_BASE`. Su valor predeterminado es
 `2026-01-15T08:00:00Z` y solo se utiliza cuando la base todavía está vacía.
 

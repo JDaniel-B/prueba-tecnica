@@ -1,4 +1,5 @@
 using MesaSitec.Dominio.Entidades;
+using MesaSitec.Dominio.Enums;
 using MesaSitec.Infraestructura.Persistencia;
 using MesaSitec.Infraestructura.Persistencia.Semillas;
 using MesaSitec.Infraestructura.Solicitudes;
@@ -20,6 +21,8 @@ public sealed class SolicitudCreacionRepositoryTests
         Guid.Parse("20000000-0000-0000-0000-000000000001");
     private static readonly Guid CategoriaSurId =
         Guid.Parse("30000000-0000-0000-0000-000000000001");
+    private static readonly Guid SolicitudNorteId =
+        Guid.Parse("40000000-0000-0000-0000-000000000001");
 
     [Fact]
     public async Task BuscarCategoriaActiva_AislaTenantYEstado()
@@ -33,7 +36,7 @@ public sealed class SolicitudCreacionRepositoryTests
             activo: false);
         baseDatos.Context.Categorias.Add(categoriaInactiva);
         await baseDatos.Context.SaveChangesAsync();
-        var repositorio = new SolicitudCreacionRepository(baseDatos.Context);
+        var repositorio = new SolicitudEscrituraRepository(baseDatos.Context);
 
         var activa = await repositorio.BuscarCategoriaActivaAsync(
             CategoriaNorteId,
@@ -55,7 +58,7 @@ public sealed class SolicitudCreacionRepositoryTests
     public async Task ObtenerSiguienteCorrelativo_EsIndependientePorTenantYAnio()
     {
         await using var baseDatos = await BaseDatosSemilla.CrearAsync();
-        var repositorio = new SolicitudCreacionRepository(baseDatos.Context);
+        var repositorio = new SolicitudEscrituraRepository(baseDatos.Context);
 
         var siguienteNorte = await repositorio.ObtenerSiguienteCorrelativoAsync(
             TenantNorteId,
@@ -71,6 +74,44 @@ public sealed class SolicitudCreacionRepositoryTests
         Assert.Equal(26, siguienteNorte);
         Assert.Equal(9, siguienteSur);
         Assert.Equal(1, primerSiguienteAnio);
+    }
+
+    [Fact]
+    public async Task BuscarYGuardar_PersisteActualizacionSinCambiarFechaCreacion()
+    {
+        await using var baseDatos = await BaseDatosSemilla.CrearAsync();
+        baseDatos.Context.ChangeTracker.Clear();
+        var repositorio = new SolicitudEscrituraRepository(baseDatos.Context);
+        var solicitud = await repositorio.BuscarAsync(
+            SolicitudNorteId,
+            TenantNorteId);
+        var solicitudOtroTenant = await repositorio.BuscarAsync(
+            SolicitudNorteId,
+            TenantSurId);
+
+        Assert.NotNull(solicitud);
+        Assert.Null(solicitudOtroTenant);
+        Assert.Equal(DateTimeKind.Utc, solicitud.FechaCreacion.Kind);
+        var fechaCreacionOriginal = solicitud.FechaCreacion;
+
+        solicitud.Actualizar(
+            "Acceso bloqueado actualizado",
+            "La cuenta continúa bloqueada después del reinicio.",
+            CategoriaNorteId,
+            PrioridadSolicitud.Critica,
+            categoriaSlaHoras: 8);
+        await repositorio.GuardarCambiosAsync();
+        baseDatos.Context.ChangeTracker.Clear();
+
+        var persistida = await baseDatos.Context.Solicitudes
+            .SingleAsync(item => item.Id == SolicitudNorteId);
+
+        Assert.Equal("Acceso bloqueado actualizado", persistida.Titulo);
+        Assert.Equal(PrioridadSolicitud.Critica, persistida.Prioridad);
+        Assert.Equal(fechaCreacionOriginal, persistida.FechaCreacion);
+        Assert.Equal(
+            fechaCreacionOriginal.AddHours(4),
+            persistida.FechaLimiteSla);
     }
 
     private sealed class BaseDatosSemilla : IAsyncDisposable

@@ -1,0 +1,90 @@
+using System.ComponentModel.DataAnnotations;
+using MesaSitec.Aplicacion.Excepciones;
+using MesaSitec.Aplicacion.Solicitudes.Contratos;
+using MesaSitec.Dominio.Entidades;
+
+namespace MesaSitec.Aplicacion.Solicitudes;
+
+public static class ValidadorSolicitudEscritura
+{
+    public static void Validar(SolicitudEscrituraRequest request)
+    {
+        var resultados = new List<ValidationResult>();
+        Validator.TryValidateObject(
+            request,
+            new ValidationContext(request),
+            resultados,
+            validateAllProperties: true);
+        var errores = resultados
+            .SelectMany(resultado =>
+            {
+                var campos = resultado.MemberNames.Any()
+                    ? resultado.MemberNames
+                    : ["body"];
+
+                return campos.Select(campo => new
+                {
+                    Campo = ComoCamelCase(campo),
+                    Mensaje = resultado.ErrorMessage
+                        ?? "El valor enviado no es válido."
+                });
+            })
+            .GroupBy(item => item.Campo)
+            .ToDictionary(
+                grupo => grupo.Key,
+                grupo => grupo.Select(item => item.Mensaje).ToArray());
+
+        if (request.Titulo is not null
+            && request.Titulo.Trim().Length
+                is < Solicitud.TituloLongitudMinima
+                or > Solicitud.TituloLongitudMaxima)
+        {
+            errores["titulo"] =
+                ["El título debe tener entre 5 y 120 caracteres."];
+        }
+
+        if (request.Descripcion is not null
+            && request.Descripcion.Trim().Length
+                is < Solicitud.DescripcionLongitudMinima
+                or > Solicitud.DescripcionLongitudMaxima)
+        {
+            errores["descripcion"] =
+                ["La descripción debe tener entre 10 y 4000 caracteres."];
+        }
+
+        if (request.CategoriaId == Guid.Empty)
+        {
+            errores["categoriaId"] = ["La categoría es obligatoria."];
+        }
+
+        if (request.Prioridad.HasValue
+            && !Enum.IsDefined(request.Prioridad.Value))
+        {
+            errores["prioridad"] =
+                ["La prioridad no contiene un valor permitido."];
+        }
+
+        if (errores.Count > 0)
+        {
+            throw new ValidacionException(errores);
+        }
+    }
+
+    public static ValidacionException CrearError(
+        string campo,
+        string mensaje)
+    {
+        return new ValidacionException(
+            new Dictionary<string, string[]>
+            {
+                [campo] = [mensaje]
+            });
+    }
+
+    private static string ComoCamelCase(string valor)
+    {
+        return string.IsNullOrEmpty(valor)
+            ? "body"
+            : char.ToLowerInvariant(valor[0]) + valor[1..];
+    }
+}
