@@ -33,6 +33,8 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ICategoriaConsultaService, CategoriaConsultaService>();
         services.AddScoped<ISolicitudConsultaRepository, SolicitudConsultaRepository>();
         services.AddScoped<ISolicitudConsultaService, SolicitudConsultaService>();
+        services.AddScoped<ISolicitudCreacionRepository, SolicitudCreacionRepository>();
+        services.AddScoped<ISolicitudCreacionService, SolicitudCreacionService>();
 
         return services;
     }

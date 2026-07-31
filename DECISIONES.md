@@ -17,6 +17,10 @@
    porque permitiría consultar otra organización manipulando la petición. En
    consultas por ID, un recurso de otro tenant se trata como inexistente (`404`);
    las restricciones de rol dentro del mismo tenant se informan como `403`.
+5. El código de una solicitud se obtiene buscando el mayor correlativo del tenant
+   y año actuales y sumando uno. El índice único evita duplicados persistidos, pero
+   no se agregó bloqueo distribuido ni reintentos porque la concurrencia del
+   correlativo está explícitamente fuera del alcance del ejercicio.
 
 ## Uso de IA
 

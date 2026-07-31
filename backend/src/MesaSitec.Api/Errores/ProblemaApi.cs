@@ -9,21 +9,39 @@ public static class ProblemaApi
         string title,
         string detail,
         string tipo,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default,
+        IReadOnlyDictionary<string, string[]>? errores = null)
     {
         context.Response.StatusCode = status;
 
-        var problema = new
+        if (errores is not null)
         {
-            type = $"https://mesasitec.local/errores/{tipo}",
-            title,
-            status,
-            detail,
-            codigo
-        };
+            var problemaConErrores = new
+            {
+                type = $"https://mesasitec.local/errores/{tipo}",
+                title,
+                status,
+                detail,
+                codigo,
+                errores
+            };
+
+            return context.Response.WriteAsJsonAsync(
+                problemaConErrores,
+                options: null,
+                contentType: "application/problem+json",
+                cancellationToken);
+        }
 
         return context.Response.WriteAsJsonAsync(
-            problema,
+            new
+            {
+                type = $"https://mesasitec.local/errores/{tipo}",
+                title,
+                status,
+                detail,
+                codigo
+            },
             options: null,
             contentType: "application/problem+json",
             cancellationToken);

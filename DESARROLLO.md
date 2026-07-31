@@ -70,6 +70,24 @@ En el detalle, un recurso inexistente o perteneciente a otro tenant responde
 una solicitud ajena de su propia organización recibe
 `403 / OPERACION_NO_PERMITIDA`.
 
+Para crear una solicitud:
+
+```http
+POST /api/v1/solicitudes
+Content-Type: application/json
+
+{
+  "titulo": "No puedo acceder al portal",
+  "descripcion": "El portal rechaza mis credenciales de acceso.",
+  "categoriaId": "20000000-0000-0000-0000-000000000001",
+  "prioridad": "Alta"
+}
+```
+
+El servidor obtiene tenant y solicitante desde el JWT, genera el código, calcula
+el SLA y responde `201` con una cabecera `Location`. Los IDs de categoría del
+ejemplo pertenecen a los datos semilla de Cooperativa Norte.
+
 Las fechas se calculan a partir de `SEED_FECHA_BASE`. Su valor predeterminado es
 `2026-01-15T08:00:00Z` y solo se utiliza cuando la base todavía está vacía.
 
