@@ -39,6 +39,10 @@
    configuración de compilación. La decisión de qué acciones mostrar se extrajo a
    una función pura compartida por la vista y sus pruebas, evitando duplicar la
    matriz de permisos en el test.
+10. `GET /agentes` es un endpoint auxiliar consumido únicamente por el selector de
+    asignación del frontend. Se excluyó de ApiExplorer para que el contrato Swagger
+    público conserve exactamente las nueve operaciones exigidas por el enunciado;
+    su aislamiento y validación siguen aplicándose en el servidor.
 
 ## Uso de IA
 
@@ -48,5 +52,13 @@ de incorporarlo y mantendré aquí las partes en las que la IA haya intervenido.
 
 ## Pendiente para el cierre
 
-Antes de entregar se documentarán el principal bloqueo y qué mejoraría con una
-semana adicional.
+El principal bloqueo técnico fue que SQLite materializa valores `DateTime` sin
+conservar `DateTimeKind.Utc`. Las consultas inicialmente lo normalizaban, pero al
+editar una entidad cargada desde disco el cálculo de SLA rechazó la fecha. Se
+resolvió mediante un `ValueConverter` de Entity Framework y una prueba de
+integración que fuerza una materialización nueva.
+
+Con una semana adicional agregaría pruebas end-to-end del navegador en CI,
+historial auditable de transiciones, reintentos del correlativo bajo concurrencia,
+telemetría estructurada y un pipeline de despliegue. Esas mejoras no se incluyeron
+porque están fuera del alcance funcional solicitado.

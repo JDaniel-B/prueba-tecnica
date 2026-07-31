@@ -8,6 +8,7 @@ namespace MesaSitec.Api.Controllers;
 
 [ApiController]
 [Authorize]
+[ApiExplorerSettings(IgnoreApi = true)]
 [Route("api/v1/agentes")]
 public sealed class AgentesController(
     IAgenteConsultaService consultaService) : ControllerBase

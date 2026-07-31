@@ -1,5 +1,74 @@
-# Prueba Técnica — Desarrollador Junior
-## Proyecto "MesaSitec"
+# MesaSitec
+
+Implementación de la prueba técnica de una mesa de servicio multi-tenant con
+ASP.NET Core 8, Entity Framework Core, SQLite, Vue 3 y TypeScript.
+
+## Inicio rápido
+
+Requisitos: .NET SDK 8 y Node.js 22.18 o 24.12 en adelante.
+
+Desde la raíz del repositorio, estos son los cuatro comandos necesarios en
+Windows PowerShell:
+
+```powershell
+Copy-Item .env.example .env
+dotnet restore backend/MesaSitec.sln
+npm install
+npm run dev
+```
+
+En Linux o macOS, sustituye el primer comando por `cp .env.example .env`.
+El último comando inicia ambos proyectos:
+
+- Frontend: `http://localhost:5173`
+- API: `http://localhost:5080`
+- Swagger: `http://localhost:5080/swagger`
+- Health check: `http://localhost:5080/api/v1/health`
+
+La API aplica automáticamente las migraciones, crea el archivo SQLite local y
+siembra los datos requeridos cuando la base está vacía. No es necesario instalar
+SQLite, SQL Server ni MySQL.
+
+## Credenciales de prueba
+
+Todos los usuarios semilla usan la contraseña `Sitec.2026`.
+
+| Rol | Cooperativa Norte | Bufete Sur |
+|---|---|---|
+| Admin | `admin@norte.test` | `admin@sur.test` |
+| Agente | `agente1@norte.test` | — |
+| Solicitante | `user1@norte.test` | `user1@sur.test` |
+
+## Comandos de verificación
+
+```sh
+npm test
+npm run build
+npm run lint
+```
+
+`npm test` ejecuta xUnit para el backend y Vitest para el frontend. La guía
+detallada está en [DESARROLLO.md](DESARROLLO.md) y las decisiones de arquitectura
+en [DECISIONES.md](DECISIONES.md). La última ejecución reproducible del checklist
+está documentada en [ACEPTACION.md](ACEPTACION.md).
+
+## Funcionalidad implementada
+
+- Autenticación JWT y perfil de sesión.
+- Aislamiento por tenant y permisos por rol.
+- Categorías activas y agentes válidos por organización.
+- Listado paginado con filtros, búsqueda y ordenamiento server-side.
+- Creación, detalle y edición de solicitudes.
+- Máquina de estados completa y cálculo de SLA.
+- Interfaz Vue con rutas privadas y los selectores de pruebas solicitados.
+- Errores uniformes `application/problem+json`.
+
+---
+
+# Enunciado original
+
+## Prueba Técnica — Desarrollador Junior
+### Proyecto "MesaSitec"
 
 **Sitecpro** · Plazo de entrega: 1 semana
 
