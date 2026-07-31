@@ -52,9 +52,13 @@ El token dura ocho horas y contiene los claims `sub`, `tenantId`, `rol` y
 Con la sesión autorizada también puedes probar el listado paginado:
 
 ```text
+GET /api/v1/categorias
 GET /api/v1/solicitudes?page=1&pageSize=20&sort=-fechaCreacion
 GET /api/v1/solicitudes?estado=EnProceso&prioridad=Alta&vencidas=true
 ```
+
+`GET /api/v1/categorias` devuelve las categorías activas que pueden usarse en
+los filtros y formularios.
 
 Un usuario `Admin` o `Agente` ve las solicitudes de su organización. Un usuario
 `Solicitante` ve únicamente las que él creó; el servidor obtiene ambos límites

@@ -1,8 +1,7 @@
 using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
+using MesaSitec.Api.Seguridad;
 using MesaSitec.Aplicacion.Autenticacion;
 using MesaSitec.Aplicacion.Autenticacion.Contratos;
-using MesaSitec.Aplicacion.Excepciones;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -19,24 +18,13 @@ public sealed class MeController(IAuthService authService) : ControllerBase
     public async Task<ActionResult<UsuarioResponse>> Get(
         CancellationToken cancellationToken)
     {
-        var usuarioId = ObtenerGuidClaim(JwtRegisteredClaimNames.Sub);
-        var tenantId = ObtenerGuidClaim("tenantId");
+        var usuarioId = User.ObtenerGuidRequerido(JwtRegisteredClaimNames.Sub);
+        var tenantId = User.ObtenerGuidRequerido("tenantId");
         var response = await authService.ObtenerUsuarioActualAsync(
             usuarioId,
             tenantId,
             cancellationToken);
 
         return Ok(response);
-    }
-
-    private Guid ObtenerGuidClaim(string claim)
-    {
-        var valor = User.FindFirstValue(claim);
-        if (!Guid.TryParse(valor, out var id))
-        {
-            throw new NoAutenticadoException("El token no contiene los claims requeridos.");
-        }
-
-        return id;
     }
 }

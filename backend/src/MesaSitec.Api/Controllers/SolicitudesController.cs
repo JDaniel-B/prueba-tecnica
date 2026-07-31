@@ -1,9 +1,7 @@
 using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using MesaSitec.Aplicacion.Excepciones;
+using MesaSitec.Api.Seguridad;
 using MesaSitec.Aplicacion.Solicitudes;
 using MesaSitec.Aplicacion.Solicitudes.Contratos;
-using MesaSitec.Dominio.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -24,9 +22,9 @@ public sealed class SolicitudesController(
         [FromQuery] ListarSolicitudesRequest request,
         CancellationToken cancellationToken)
     {
-        var tenantId = ObtenerGuidClaim("tenantId");
-        var usuarioId = ObtenerGuidClaim(JwtRegisteredClaimNames.Sub);
-        var rol = ObtenerRolClaim();
+        var tenantId = User.ObtenerGuidRequerido("tenantId");
+        var usuarioId = User.ObtenerGuidRequerido(JwtRegisteredClaimNames.Sub);
+        var rol = User.ObtenerRolRequerido();
         var response = await consultaService.ListarAsync(
             request,
             tenantId,
@@ -35,29 +33,5 @@ public sealed class SolicitudesController(
             cancellationToken);
 
         return Ok(response);
-    }
-
-    private Guid ObtenerGuidClaim(string claim)
-    {
-        var valor = User.FindFirstValue(claim);
-        if (!Guid.TryParse(valor, out var id))
-        {
-            throw new NoAutenticadoException(
-                "El token no contiene los claims requeridos.");
-        }
-
-        return id;
-    }
-
-    private RolUsuario ObtenerRolClaim()
-    {
-        var valor = User.FindFirstValue("rol");
-        if (!Enum.TryParse<RolUsuario>(valor, out var rol))
-        {
-            throw new NoAutenticadoException(
-                "El token no contiene los claims requeridos.");
-        }
-
-        return rol;
     }
 }
