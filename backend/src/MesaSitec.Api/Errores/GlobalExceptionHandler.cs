@@ -37,6 +37,13 @@ public sealed class GlobalExceptionHandler(
                 "Operación no permitida",
                 exception.Message,
                 "operacion-no-permitida"),
+            ValidacionException validacion => new DatosProblema(
+                StatusCodes.Status422UnprocessableEntity,
+                "VALIDACION",
+                "Error de validación",
+                validacion.Message,
+                "validacion",
+                validacion.Errores),
             _ => new DatosProblema(
                 StatusCodes.Status500InternalServerError,
                 "ERROR_INTERNO",
@@ -57,7 +64,8 @@ public sealed class GlobalExceptionHandler(
             problema.Title,
             problema.Detail,
             problema.Tipo,
-            cancellationToken);
+            cancellationToken,
+            problema.Errores);
 
         return true;
     }
@@ -67,5 +75,6 @@ public sealed class GlobalExceptionHandler(
         string Codigo,
         string Title,
         string Detail,
-        string Tipo);
+        string Tipo,
+        IReadOnlyDictionary<string, string[]>? Errores = null);
 }

@@ -11,8 +11,31 @@ namespace MesaSitec.Api.Controllers;
 [Authorize]
 [Route("api/v1/solicitudes")]
 public sealed class SolicitudesController(
-    ISolicitudConsultaService consultaService) : ControllerBase
+    ISolicitudConsultaService consultaService,
+    ISolicitudCreacionService creacionService) : ControllerBase
 {
+    [HttpPost]
+    [ProducesResponseType<SolicitudDetalleResponse>(StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
+    public async Task<ActionResult<SolicitudDetalleResponse>> Post(
+        CrearSolicitudRequest request,
+        CancellationToken cancellationToken)
+    {
+        var tenantId = User.ObtenerGuidRequerido("tenantId");
+        var usuarioId = User.ObtenerGuidRequerido(JwtRegisteredClaimNames.Sub);
+        var response = await creacionService.CrearAsync(
+            request,
+            tenantId,
+            usuarioId,
+            cancellationToken);
+
+        return CreatedAtAction(
+            nameof(GetById),
+            new { id = response.Id },
+            response);
+    }
+
     [HttpGet]
     [ProducesResponseType<PaginaResponse<SolicitudListadoResponse>>(
         StatusCodes.Status200OK)]
