@@ -63,6 +63,47 @@ public sealed class EntidadesTests
         Assert.Throws<ArgumentException>(accion);
     }
 
+    [Fact]
+    public void Solicitud_ActualizarRecalculaSlaDesdeLaFechaOriginal()
+    {
+        var solicitud = CrearSolicitud();
+        var fechaCreacionOriginal = solicitud.FechaCreacion;
+        var nuevaCategoriaId = Guid.NewGuid();
+
+        solicitud.Actualizar(
+            "  Acceso al portal actualizado  ",
+            "  La descripción actualizada conserva información suficiente.  ",
+            nuevaCategoriaId,
+            PrioridadSolicitud.Critica,
+            categoriaSlaHoras: 8);
+
+        Assert.Equal("Acceso al portal actualizado", solicitud.Titulo);
+        Assert.Equal(
+            "La descripción actualizada conserva información suficiente.",
+            solicitud.Descripcion);
+        Assert.Equal(nuevaCategoriaId, solicitud.CategoriaId);
+        Assert.Equal(PrioridadSolicitud.Critica, solicitud.Prioridad);
+        Assert.Equal(fechaCreacionOriginal, solicitud.FechaCreacion);
+        Assert.Equal(fechaCreacionOriginal.AddHours(4), solicitud.FechaLimiteSla);
+    }
+
+    [Fact]
+    public void Solicitud_ActualizarEstadoTerminalNoRecalculaSla()
+    {
+        var solicitud = CrearSolicitud();
+        var fechaLimiteOriginal = solicitud.FechaLimiteSla;
+        EstablecerEstado(solicitud, EstadoSolicitud.Resuelta);
+
+        solicitud.Actualizar(
+            "Acceso corregido después de resolver",
+            "La descripción puede corregirse sin alterar el SLA histórico.",
+            Guid.NewGuid(),
+            PrioridadSolicitud.Critica,
+            categoriaSlaHoras: 4);
+
+        Assert.Equal(fechaLimiteOriginal, solicitud.FechaLimiteSla);
+    }
+
     private static Solicitud CrearSolicitud(string titulo = "No puedo acceder al portal")
     {
         return new Solicitud(
@@ -76,5 +117,14 @@ public sealed class EntidadesTests
             Guid.NewGuid(),
             FechaBase,
             8);
+    }
+
+    private static void EstablecerEstado(
+        Solicitud solicitud,
+        EstadoSolicitud estado)
+    {
+        typeof(Solicitud)
+            .GetProperty(nameof(Solicitud.Estado))!
+            .SetValue(solicitud, estado);
     }
 }

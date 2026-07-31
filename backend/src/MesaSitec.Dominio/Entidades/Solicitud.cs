@@ -89,6 +89,46 @@ public sealed class Solicitud
 
     public string? MotivoCancelacion { get; private set; }
 
+    public void Actualizar(
+        string titulo,
+        string descripcion,
+        Guid categoriaId,
+        PrioridadSolicitud prioridad,
+        int categoriaSlaHoras)
+    {
+        ValidarIdentificador(categoriaId, nameof(categoriaId));
+        ValidarTexto(
+            titulo,
+            nameof(titulo),
+            TituloLongitudMinima,
+            TituloLongitudMaxima);
+        ValidarTexto(
+            descripcion,
+            nameof(descripcion),
+            DescripcionLongitudMinima,
+            DescripcionLongitudMaxima);
+
+        var cambiaReglaSla = CategoriaId != categoriaId
+            || Prioridad != prioridad;
+        var admiteRecalculoSla = Estado is not (
+            EstadoSolicitud.Resuelta
+            or EstadoSolicitud.Cerrada
+            or EstadoSolicitud.Cancelada);
+
+        Titulo = titulo.Trim();
+        Descripcion = descripcion.Trim();
+        CategoriaId = categoriaId;
+        Prioridad = prioridad;
+
+        if (cambiaReglaSla && admiteRecalculoSla)
+        {
+            FechaLimiteSla = CalculadoraSla.Calcular(
+                FechaCreacion,
+                categoriaSlaHoras,
+                prioridad);
+        }
+    }
+
     private static void ValidarIdentificador(Guid id, string parametro)
     {
         if (id == Guid.Empty)

@@ -1,6 +1,7 @@
 using MesaSitec.Dominio.Entidades;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace MesaSitec.Infraestructura.Persistencia.Configuraciones;
 
@@ -8,6 +9,10 @@ public sealed class SolicitudConfiguracion : IEntityTypeConfiguration<Solicitud>
 {
     public void Configure(EntityTypeBuilder<Solicitud> builder)
     {
+        var conversorFechaUtc = new ValueConverter<DateTime, DateTime>(
+            fecha => fecha,
+            fecha => DateTime.SpecifyKind(fecha, DateTimeKind.Utc));
+
         builder.ToTable(
             "Solicitudes",
             table =>
@@ -48,9 +53,11 @@ public sealed class SolicitudConfiguracion : IEntityTypeConfiguration<Solicitud>
             .IsRequired();
 
         builder.Property(solicitud => solicitud.FechaCreacion)
+            .HasConversion(conversorFechaUtc)
             .IsRequired();
 
         builder.Property(solicitud => solicitud.FechaLimiteSla)
+            .HasConversion(conversorFechaUtc)
             .IsRequired();
 
         builder.HasOne<Tenant>()

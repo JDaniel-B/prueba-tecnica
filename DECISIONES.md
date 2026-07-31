@@ -21,6 +21,10 @@
    y año actuales y sumando uno. El índice único evita duplicados persistidos, pero
    no se agregó bloqueo distribuido ni reintentos porque la concurrencia del
    correlativo está explícitamente fuera del alcance del ejercicio.
+6. La entidad `Solicitud` es responsable de aplicar una edición y recalcular el SLA.
+   El cálculo siempre parte de `FechaCreacion`, que es inmutable, y solo se repite
+   cuando cambia la categoría o prioridad de una solicitud no terminal. Se preserva
+   el SLA histórico de solicitudes resueltas, cerradas o canceladas.
 
 ## Uso de IA
 

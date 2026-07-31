@@ -94,7 +94,7 @@ public sealed class SolicitudCreacionServiceTests
             creacionRepository,
             new ConsultaRepositoryStub(_ => null),
             new RelojFijo(Ahora));
-        var request = new CrearSolicitudRequest
+        var request = new SolicitudEscrituraRequest
         {
             Titulo = "1234",
             Descripcion = "corta",
@@ -122,7 +122,7 @@ public sealed class SolicitudCreacionServiceTests
             creacionRepository,
             new ConsultaRepositoryStub(_ => null),
             new RelojFijo(Ahora));
-        var request = new CrearSolicitudRequest
+        var request = new SolicitudEscrituraRequest
         {
             Titulo = "    x    ",
             Descripcion = "         x         ",
@@ -141,11 +141,11 @@ public sealed class SolicitudCreacionServiceTests
         Assert.Null(creacionRepository.Guardada);
     }
 
-    private static CrearSolicitudRequest CrearRequest(
+    private static SolicitudEscrituraRequest CrearRequest(
         Guid categoriaId,
         PrioridadSolicitud prioridad)
     {
-        return new CrearSolicitudRequest
+        return new SolicitudEscrituraRequest
         {
             Titulo = "No puedo acceder al portal",
             Descripcion = "El portal rechaza mis credenciales de acceso.",
@@ -156,7 +156,7 @@ public sealed class SolicitudCreacionServiceTests
 
     private sealed class CreacionRepositoryStub(
         CategoriaParaSolicitud? categoria,
-        int correlativo) : ISolicitudCreacionRepository
+        int correlativo) : ISolicitudEscrituraRepository
     {
         public Solicitud? Guardada { get; private set; }
 
@@ -176,11 +176,25 @@ public sealed class SolicitudCreacionServiceTests
             return Task.FromResult(correlativo);
         }
 
-        public Task GuardarAsync(
+        public Task<Solicitud?> BuscarAsync(
+            Guid id,
+            Guid tenantId,
+            CancellationToken cancellationToken = default)
+        {
+            return Task.FromResult<Solicitud?>(null);
+        }
+
+        public Task AgregarAsync(
             Solicitud solicitud,
             CancellationToken cancellationToken = default)
         {
             Guardada = solicitud;
+            return Task.CompletedTask;
+        }
+
+        public Task GuardarCambiosAsync(
+            CancellationToken cancellationToken = default)
+        {
             return Task.CompletedTask;
         }
     }

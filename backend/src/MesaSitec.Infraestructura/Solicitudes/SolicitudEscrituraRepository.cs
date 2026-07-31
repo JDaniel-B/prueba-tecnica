@@ -7,8 +7,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace MesaSitec.Infraestructura.Solicitudes;
 
-public sealed class SolicitudCreacionRepository(
-    MesaSitecDbContext dbContext) : ISolicitudCreacionRepository
+public sealed class SolicitudEscrituraRepository(
+    MesaSitecDbContext dbContext) : ISolicitudEscrituraRepository
 {
     public Task<CategoriaParaSolicitud?> BuscarCategoriaActivaAsync(
         Guid categoriaId,
@@ -25,6 +25,17 @@ public sealed class SolicitudCreacionRepository(
                 categoria.Id,
                 categoria.SlaHoras))
             .SingleOrDefaultAsync(cancellationToken);
+    }
+
+    public Task<Solicitud?> BuscarAsync(
+        Guid id,
+        Guid tenantId,
+        CancellationToken cancellationToken = default)
+    {
+        return dbContext.Solicitudes.SingleOrDefaultAsync(
+            solicitud => solicitud.Id == id
+                && solicitud.TenantId == tenantId,
+            cancellationToken);
     }
 
     public async Task<int> ObtenerSiguienteCorrelativoAsync(
@@ -59,11 +70,17 @@ public sealed class SolicitudCreacionRepository(
         return ultimoCorrelativo + 1;
     }
 
-    public async Task GuardarAsync(
+    public async Task AgregarAsync(
         Solicitud solicitud,
         CancellationToken cancellationToken = default)
     {
         dbContext.Solicitudes.Add(solicitud);
         await dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    public Task GuardarCambiosAsync(
+        CancellationToken cancellationToken = default)
+    {
+        return dbContext.SaveChangesAsync(cancellationToken);
     }
 }

@@ -5,7 +5,7 @@ using MesaSitec.Dominio.Enums;
 
 namespace MesaSitec.Aplicacion.Solicitudes.Contratos;
 
-public sealed class CrearSolicitudRequest
+public sealed class SolicitudEscrituraRequest
 {
     [Required(ErrorMessage = "El título es obligatorio.")]
     [StringLength(
